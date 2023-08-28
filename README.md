@@ -1,36 +1,44 @@
-def is_potential_scam(email_content):
-    scam_keywords = [
-        "urgent",
-        "win",
-        "lottery",
-        "inheritance",
-        "bank account",
-        "Nigerian prince",
-        "dear friend",
-        "password",
-        "verify",
-        "login",
-    ]
-    
-    email_content_lower = email_content.lower()
-    
-    for keyword in scam_keywords:
-        if keyword in email_content_lower:
+import requests
+API_KEY = "youtube"  
+BASE_URL = "https://www.youtube.com/"
+
+
+def is_safe_to_visit(url):
+    payload = {
+        "client": {
+            "clientId": "Youtube",
+            "clientVersion": "1.0.0"
+        },
+        "threatInfo": {
+            "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
+            "platformTypes": ["ANY_PLATFORM"],
+            "threatEntryTypes": ["URL"],
+            "threatEntries": [{"url": url}]
+        }
+    }
+
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(
+        f"{BASE_URL}?key={API_KEY}",
+        json=payload,
+        headers=headers
+    )
+
+    if response.status_code == 200:
+        data = response.json()
+        if "matches" in data:
+            return False
+        else:
             return True
-    
-    return False
-
-def main():
-    print("Scam and Hack Detector")
-    print("----------------------")
-    
-    email_content = input("Enter the email content: ")
-    
-    if is_potential_scam(email_content):
-        print("Warning: This email may be a potential scam.")
     else:
-        print("This email seems legitimate.")
-    
-if __name__ == "__main__":
-    main()
+        print("Error:", response.status_code)
+        return False
 
+
+website_url = "https://www.youtube.com"
+
+if is_safe_to_visit(website_url):
+    print("Website is safe to visit.")
+else:
+    print("Website may not be safe to visit.")
